@@ -1,0 +1,9 @@
+{
+  "name": "luckydraw-legacy-redirect",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "301-redirects the old LuckyDraw Railway domain to the new one, path and query preserved.",
+  "scripts": { "start": "node server.js", "build": "echo no-build", "test": "node --test test.js" },
+  "engines": { "node": ">=18" }
+}
