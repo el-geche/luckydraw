@@ -224,14 +224,17 @@ with filters.
 
 ## Static preview (GitHub Pages / Vercel)
 
+Live previews: **https://el-geche.github.io/luckydraw/** (GitHub Pages) · **https://luckydraw-sooty.vercel.app** (Vercel).
+
 The hosted previews are **frontend only**. GitHub Pages and the Vercel static deployment have no Express API and no
 database, so the client is built in *static preview* mode:
 
 ```bash
 VITE_BASE=/luckydraw/ VITE_STATIC_PREVIEW=1 npm run build -w client   # GitHub Pages (repo base path)
-VITE_STATIC_PREVIEW=1 npm run build -w client                         # root-hosted static (Vercel)
+VITE_STATIC_PREVIEW=1 VITE_STATIC_HOST=Vercel npx vite build client --outDir dist-vercel   # root-hosted static (Vercel)
 ```
 
+* Vercel: copy `deploy/vercel-static.json` to `client/dist-vercel/vercel.json` (SPA rewrites and SW/manifest headers), then run `vercel deploy --prod` from that folder.
 * `VITE_BASE` sets the router basename, asset URLs, manifest `id`/`start_url`/`scope`/icons and the service-worker
   navigation fallback. `404.html` is a copy of `index.html`, so deep links work on Pages.
 * In static preview, a persistent banner reads *"Static preview on GitHub Pages: live draws need the backend; see
