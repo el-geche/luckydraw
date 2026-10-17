@@ -47,6 +47,13 @@ export default function Admin() {
 }
 
 function ResetButton() {
+  // Hidden unless the server allows destructive resets (off on hosted/production deployments).
+  const { data: meta } = useApi('/meta');
+  if (!meta?.demoResetEnabled) return null;
+  return <ResetControl />;
+}
+
+function ResetControl() {
   const toast = useToast();
   const { refresh } = useAuth();
   const [busy, setBusy] = useState(false);

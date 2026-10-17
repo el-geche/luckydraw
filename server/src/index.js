@@ -6,12 +6,14 @@ import { config } from './config.js';
 import { createDb, migrate } from './db/index.js';
 import { createApp } from './app.js';
 import { schedulerPass } from './services/lifecycle.js';
-import { seedDatabase } from './seed.js';
+import { seedDatabase, isDatabaseEmpty } from './seed.js';
 
 const db = await createDb();
 await migrate(db);
 const { rows: [{ n }] } = await db.query('SELECT COUNT(*)::int AS n FROM users');
-if (n === 0) {
+// Auto-seed only a brand-new database. Where reset is disabled (hosted/production) every core table must be empty,
+// so a deployment with existing draws/entries can never be wiped by a startup reseed.
+if (n === 0 && (config.allowDemoReset || (await isDatabaseEmpty(db)))) {
   console.log('[luckydraw] empty database — loading demo seed data…');
   await seedDatabase(db, { log: console.log });
 }
@@ -33,6 +35,7 @@ if (fs.existsSync(path.join(dist, 'index.html')) && process.env.SERVE_CLIENT !==
   // SPA fallback: deep links / home-screen launches of any client route get index.html.
   app.get(/^(?!\/api|\/share).*/, (_req, res) => { res.setHeader('Cache-Control', 'no-cache'); res.sendFile(path.join(dist, 'index.html')); });
 }
+console.log(`[luckydraw] demo reset ${config.allowDemoReset ? 'ENABLED' : 'disabled'} on this deployment`);
 const server = app.listen(config.port, () => {
   console.log(`[luckydraw] API listening on http://localhost:${config.port}  (db: ${db.describe})`);
   console.log('[luckydraw] DEMO MODE — all money is simulated.');

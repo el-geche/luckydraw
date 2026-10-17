@@ -58,3 +58,15 @@ Object.defineProperty(config, 'registrationMode', {
   enumerable: true,
   get: () => (String(process.env.REGISTRATION_MODE || 'open').trim().toLowerCase() === 'closed' ? 'closed' : 'open'),
 });
+
+// Destructive demo reset/reseed (POST /api/admin/reset, npm run seed). ALLOW_DEMO_RESET=true|false overrides;
+// otherwise it defaults to OFF for hosted databases (DATABASE_URL set) or NODE_ENV=production, ON for local/static demo.
+Object.defineProperty(config, 'allowDemoReset', {
+  enumerable: true,
+  get: () => {
+    const v = String(process.env.ALLOW_DEMO_RESET ?? '').trim().toLowerCase();
+    if (v === 'true' || v === '1') return true;
+    if (v === 'false' || v === '0') return false;
+    return !(process.env.DATABASE_URL || process.env.NODE_ENV === 'production');
+  },
+});

@@ -3,6 +3,10 @@ import { createDb } from './db/index.js';
 import { seedDatabase } from './seed.js';
 import { DEMO_ACCOUNTS } from './demoAccounts.js';
 
+if (!config.allowDemoReset) {
+  console.error('seed: reset is disabled on this deployment (DATABASE_URL set or NODE_ENV=production). Set ALLOW_DEMO_RESET=true to reseed a disposable database.');
+  process.exit(1);
+}
 const base = `http://localhost:${config.port}`;
 
 async function serverRunning() {

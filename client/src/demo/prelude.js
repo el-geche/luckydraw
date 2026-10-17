@@ -8,6 +8,7 @@ globalThis.__LD_ENV__ ??= {};
 globalThis.process.env = globalThis.__LD_ENV__;
 Object.assign(globalThis.__LD_ENV__, {
   NODE_ENV: 'production',
+  ALLOW_DEMO_RESET: 'true',        // static demo: the in-browser database is per-visitor and disposable
   MAIL_TRANSPORT: 'none',          // in-app outbox table only; nothing leaves the browser
   ANCHOR_PROVIDERS: 'none',        // no external anchoring from visitors' browsers
   ENTROPY_PROVIDER: 'drand',       // public drand beacon (read-only HTTPS GET); falls back to "none" if unreachable

@@ -3,7 +3,7 @@ import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { ALGORITHM, MAX_ENTRIES_PER_USER, MAX_TICKETS_PER_ENTRY } from '@luckydraw/shared';
-import { optionalAuth, requireAuth, requireAdmin, signToken } from './auth.js';
+import { authFromDb, requireAuth, requireAdmin, signToken } from './auth.js';
 import { HttpError, badRequest, unauthorized, conflict, notFound, forbidden } from './errors.js';
 import { createDraw, enterDraw, closeDraw, executeDraw, serializeDraw, getDrawRow } from './services/draws.js';
 import { getBalance, addTransaction, serializeTx, validateDepositAmount } from './services/wallet.js';
@@ -33,7 +33,7 @@ export function createApp(db) {
   const app = express();
   app.use(cors());
   app.use(express.json({ limit: '1mb' }));
-  app.use(optionalAuth);
+  app.use(authFromDb(db));
   app.use((_req, res, next) => { res.set('X-LuckyDraw-Demo', 'simulated-money-only'); next(); });
 
   // ---------- meta ----------
@@ -44,7 +44,7 @@ export function createApp(db) {
   app.get('/api/meta', (_req, res) => res.json({
     demo: true, notice: 'DEMO — no real money. All balances, deposits and payouts are simulated.',
     algorithm: ALGORITHM, maxEntriesPerUser: MAX_ENTRIES_PER_USER, maxTicketsPerEntry: MAX_TICKETS_PER_ENTRY,
-    paymentsProvider: paymentsProvider.name, db: db.kind, mailTransport: config.mail.transport, registrationMode: config.registrationMode,
+    paymentsProvider: paymentsProvider.name, db: db.kind, mailTransport: config.mail.transport, registrationMode: config.registrationMode, demoResetEnabled: config.allowDemoReset,
   }));
 
   // ---------- auth ----------
@@ -241,6 +241,7 @@ export function createApp(db) {
     res.json(rows.map((e) => serializeEmail(e)));
   }));
   admin.post('/reset', wrap(async (_req, res) => {
+    if (!config.allowDemoReset) throw forbidden('Reset is disabled on this deployment');
     await seedDatabase(db, { log: console.log });
     res.json({ ok: true });
   }));

@@ -1,3 +1,4 @@
+import { config } from './config.js';
 /**
  * Seed data: demo users, wallet history, four completed draws (run through the
  * real engine with real commit-reveal seeds), one closed draw awaiting an admin
@@ -19,6 +20,12 @@ const DAY = 24 * HOUR;
 
 export async function seedDatabase(db, { log = () => {}, mailTransport } = {}) {
   await migrate(db);
+  // Never wipe data where destructive reset is disabled (hosted/production): only an entirely empty database may be seeded.
+  if (!config.allowDemoReset && !(await isDatabaseEmpty(db))) {
+    const e = new Error('Refusing to reseed: reset is disabled on this deployment and the database already contains data');
+    e.code = 'RESET_DISABLED';
+    throw e;
+  }
   // Real accounts created with `npm run create-user` survive reseeding (their demo activity does not).
   const { rows: kept } = await db.query('SELECT email, name, password_hash, role, referral_code, unsubscribe_token, timezone, created_at FROM users WHERE keep_on_reseed');
   await db.exec('TRUNCATE announcement_events, preference_events, reminder_log, draw_anchors, confirmation_ledger, outbox_emails, entry_receipts, draw_logs, wallet_transactions, entries, draws, draw_schedules, users RESTART IDENTITY CASCADE');
@@ -129,4 +136,12 @@ export async function seedDatabase(db, { log = () => {}, mailTransport } = {}) {
   }, 'seed');
   const m = await materializeSchedules(db);
   log(`  schedule "Friday Evening Draw" — ${m.created} draw(s) materialised`);
+}
+
+/** True when no core table holds any row (seeding then cannot destroy anything). */
+export async function isDatabaseEmpty(db) {
+  const { rows: [r] } = await db.query(`SELECT
+    (SELECT COUNT(*) FROM users) + (SELECT COUNT(*) FROM draws) + (SELECT COUNT(*) FROM entries) +
+    (SELECT COUNT(*) FROM wallet_transactions) + (SELECT COUNT(*) FROM outbox_emails) AS n`);
+  return Number(r.n) === 0;
 }
