@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Page, Rise } from '../components/Page.jsx';
 import { useAuth } from '../lib/auth.jsx';
 import { Button, Card, ErrorNote } from '../components/ui.jsx';
+import { useRegistrationOpen } from '../lib/registration.js';
 
 export default function Register() {
   const { register } = useAuth();
@@ -16,6 +17,18 @@ export default function Register() {
     e.preventDefault(); setBusy(true); setErr(null);
     try { await register(f); nav('/dashboard'); } catch (x) { setErr(x); } finally { setBusy(false); }
   };
+  const { open: registrationOpen, loading: metaLoading } = useRegistrationOpen();
+  if (!metaLoading && !registrationOpen) {
+    return (
+      <Page className="auth-page">
+        <Rise><Card className="auth-card narrow">
+          <h1>Registration is closed</h1>
+          <p className="muted">Registration is closed; contact the organiser for an account.</p>
+          <p className="muted small">Already have an account? <Link className="link" to="/login">Sign in</Link></p>
+        </Card></Rise>
+      </Page>
+    );
+  }
   return (
     <Page className="auth-page">
       <Rise><Card className="auth-card narrow">

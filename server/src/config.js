@@ -52,3 +52,9 @@ config.organizerTimezone = process.env.ORGANIZER_TZ || 'Africa/Nairobi';
 // Open tracking for winner emails: only when SMTP is configured AND explicitly enabled. Off by default.
 config.openTracking = process.env.MAIL_OPEN_TRACKING === 'true';
 config.mailWebhookSecret = process.env.MAIL_WEBHOOK_SECRET || '';
+// Public self-service sign-up: "open" (default; local dev, static demo, tests) or "closed" (hosted backends:
+// accounts are created by the organiser with `npm run create-user`). Read on each access so it can be toggled in tests.
+Object.defineProperty(config, 'registrationMode', {
+  enumerable: true,
+  get: () => (String(process.env.REGISTRATION_MODE || 'open').trim().toLowerCase() === 'closed' ? 'closed' : 'open'),
+});

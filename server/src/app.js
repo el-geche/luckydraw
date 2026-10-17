@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { ALGORITHM, MAX_ENTRIES_PER_USER, MAX_TICKETS_PER_ENTRY } from '@luckydraw/shared';
 import { optionalAuth, requireAuth, requireAdmin, signToken } from './auth.js';
-import { HttpError, badRequest, unauthorized, conflict, notFound } from './errors.js';
+import { HttpError, badRequest, unauthorized, conflict, notFound, forbidden } from './errors.js';
 import { createDraw, enterDraw, closeDraw, executeDraw, serializeDraw, getDrawRow } from './services/draws.js';
 import { getBalance, addTransaction, serializeTx, validateDepositAmount } from './services/wallet.js';
 import { paymentsProvider } from './payments/index.js';
@@ -43,7 +43,7 @@ export function createApp(db) {
   app.get('/api/meta', (_req, res) => res.json({
     demo: true, notice: 'DEMO — no real money. All balances, deposits and payouts are simulated.',
     algorithm: ALGORITHM, maxEntriesPerUser: MAX_ENTRIES_PER_USER, maxTicketsPerEntry: MAX_TICKETS_PER_ENTRY,
-    paymentsProvider: paymentsProvider.name, db: db.kind, mailTransport: config.mail.transport,
+    paymentsProvider: paymentsProvider.name, db: db.kind, mailTransport: config.mail.transport, registrationMode: config.registrationMode,
   }));
 
   // ---------- auth ----------
@@ -58,6 +58,7 @@ export function createApp(db) {
   }));
 
   app.post('/api/auth/register', wrap(async (req, res) => {
+    if (config.registrationMode === 'closed') throw forbidden('Registration is closed');
     const email = String(req.body?.email || '').trim().toLowerCase();
     const name = String(req.body?.name || '').trim();
     const password = String(req.body?.password || '');

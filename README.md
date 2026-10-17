@@ -302,6 +302,7 @@ npm run create-user -- --email member@example.com --role member --name "Member" 
 | `ANCHOR_PROVIDERS` | `opentimestamps` | comma list: `opentimestamps,rfc3161,webhook` or `none`; `OTS_CALENDARS`, `TSA_URL`, `ANCHOR_WEBHOOK_URL` |
 | `RECEIPT_RATE_MAX` / `RECEIPT_RATE_WINDOW_MS` | 20 / 60000 | receipt lookup rate limit |
 | `ORGANIZER_TZ` | `Africa/Nairobi` | organizer local time in logs |
+| `REGISTRATION_MODE` | `open` | `closed` disables public sign-up (`POST /api/auth/register` → 403); create accounts with `npm run create-user` |
 
 **Switching to Postgres or Supabase:** set `DATABASE_URL=postgres://…` (Supabase: use the pooled connection string
 and `PGSSL=true`), then run `npm run seed`. The schema in `server/src/db/schema.sql` is applied automatically. The same

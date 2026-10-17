@@ -6,6 +6,7 @@ import { useApi } from '../lib/useApi.js';
 import { useAuth } from '../lib/auth.jsx';
 import { Button, Card } from '../components/ui.jsx';
 import { STATIC_PREVIEW } from '../lib/staticMode.js';
+import { useRegistrationOpen } from '../lib/registration.js';
 import { DEMO_ACCOUNTS } from '../../../server/src/demoAccounts.js';
 
 // Seeded accounts are public demo credentials (documented in the README); shown even if the API is down.
@@ -28,6 +29,7 @@ export default function Login() {
   const [params] = useSearchParams();
   const next = params.get('next') || '/dashboard';
   const { data } = useApi('/auth/demo-accounts');
+  const { open: registrationOpen } = useRegistrationOpen();
   const accounts = data?.length ? data : FALLBACK_ACCOUNTS;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -61,7 +63,7 @@ export default function Login() {
             {msg && <div className="note note-danger" role="alert" data-testid="login-error">{msg}</div>}
             <Button type="submit" loading={busy === 'form'} disabled={busy != null || !email || !password} className="btn-gold btn-block">{busy === 'form' ? 'Signing in…' : 'Sign in'}</Button>
           </form>
-          <p className="muted small">New here? <Link className="link" to="/register">Create a demo account</Link></p>
+          {registrationOpen && <p className="muted small">New here? <Link className="link" to="/register">Create a demo account</Link></p>}
         </Card></Rise>
         <Rise><Card className="picker">
           <h3 className="card-title">Quick demo login</h3>
