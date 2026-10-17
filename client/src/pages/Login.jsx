@@ -13,9 +13,9 @@ import { DEMO_ACCOUNTS } from '../../../server/src/demoAccounts.js';
 const FALLBACK_ACCOUNTS = DEMO_ACCOUNTS.map(({ email, password, name, role }) => ({ email, password, name, role }));
 
 /** Human-readable sign-in error (wrong password, server unreachable, demo engine failed…). */
-export function signInMessage(err) {
+export function signInMessage(err, { inviteOnly = false } = {}) {
   if (!err) return null;
-  if (err.status === 401) return 'Wrong email or password. Demo members use demo123; the admin uses admin123.';
+  if (err.status === 401) return inviteOnly ? 'Wrong email or password. Check both and try again.' : 'Wrong email or password. Demo members use demo123; the admin uses admin123.';
   if (err.status === 429) return 'Too many attempts. Wait a minute and try again.';
   if (err.status === 0 || err.body?.code === 'UNREACHABLE') return STATIC_PREVIEW
     ? `The in-browser demo backend could not start (${err.message}). Try reloading the page.`
@@ -45,13 +45,15 @@ export default function Login() {
     } catch (x) { setErr(x); } finally { setBusy(null); }
   };
   const fill = (a) => { setEmail(a.email); setPassword(a.password); setErr(null); pwRef.current?.focus(); };
-  const msg = signInMessage(err);
+  // Invite-only hosted backends (sign-up closed) don't advertise the seeded demo logins.
+  const inviteOnly = !registrationOpen;
+  const msg = signInMessage(err, { inviteOnly });
   return (
     <Page className="auth-page">
-      <div className="auth-grid">
+      <div className={`auth-grid${inviteOnly ? ' single' : ''}`}>
         <Rise><Card className="auth-card">
           <h1>Sign in</h1>
-          <p className="muted">Demo platform — accounts and money are simulated.</p>
+          <p className="muted">{inviteOnly ? 'Members only. Use the email and password the organiser set up for you.' : 'Demo platform — accounts and money are simulated.'}</p>
           <form onSubmit={(e) => { e.preventDefault(); go(email, password); }} className="stack" noValidate>
             <label>Email<input className="input" type="email" name="email" autoComplete="username" value={email} onChange={(e) => { setEmail(e.target.value); setErr(null); }} required aria-invalid={err?.status === 401 || undefined} /></label>
             <label>Password
@@ -64,8 +66,9 @@ export default function Login() {
             <Button type="submit" loading={busy === 'form'} disabled={busy != null || !email || !password} className="btn-gold btn-block">{busy === 'form' ? 'Signing in…' : 'Sign in'}</Button>
           </form>
           {registrationOpen && <p className="muted small">New here? <Link className="link" to="/register">Create a demo account</Link></p>}
+          {inviteOnly && <p className="muted small">Not a member yet? Access is by invitation — <Link className="link" to="/#request-access">request access</Link>.</p>}
         </Card></Rise>
-        <Rise><Card className="picker">
+        {!inviteOnly && <Rise><Card className="picker">
           <h3 className="card-title">Quick demo login</h3>
           <p className="muted small">One click signs you in as a seeded account, or use <strong>Fill</strong> to copy its credentials into the form. Members use password <span className="mono">demo123</span>; the admin uses <span className="mono">admin123</span>.</p>
           <div className="picker-grid" data-testid="demo-accounts">
@@ -81,7 +84,7 @@ export default function Login() {
               </motion.div>
             ))}
           </div>
-        </Card></Rise>
+        </Card></Rise>}
       </div>
     </Page>
   );

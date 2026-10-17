@@ -6,8 +6,20 @@ import { DrawCard } from '../components/DrawCard.jsx';
 import { Countdown } from '../components/Countdown.jsx';
 import { Hash, Skeleton, ModeChip, Empty } from '../components/ui.jsx';
 import { money } from '../lib/format.js';
+import { useAuth } from '../lib/auth.jsx';
+import { useApi as useMeta } from '../lib/useApi.js';
+import Landing from './Landing.jsx';
 
+/** Signed-out visitors on an invite-only (registration closed) backend see the landing page; members see the draws. */
 export default function Home() {
+  const { user, ready } = useAuth();
+  const { data: meta, loading } = useMeta('/meta');
+  if (!ready || (!user && loading)) return <main id="main" className="page container" aria-busy="true" />;
+  if (!user && meta?.registrationMode === 'closed') return <Landing />;
+  return <DrawsHome />;
+}
+
+function DrawsHome() {
   const { data: draws, loading } = useApi('/draws', { poll: 5000 });
   const open = draws?.filter((d) => d.status === 'open') ?? [];
   const closed = draws?.filter((d) => d.status === 'closed') ?? [];

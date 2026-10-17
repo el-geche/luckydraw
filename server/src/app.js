@@ -14,6 +14,7 @@ import { seedDatabase } from './seed.js';
 import { sendEntryReceiptEmail } from './services/receipts.js';
 import { serializeEmail } from './mail/index.js';
 import { registerExtraRoutes } from './routes/extra.js';
+import { registerAccessRequestRoutes } from './routes/accessRequests.js';
 import { logAnnouncement } from './services/events.js';
 import { afterDraw } from './services/lifecycle.js';
 import { newUnsubscribeToken } from './services/reminders.js';
@@ -243,6 +244,7 @@ export function createApp(db) {
     await seedDatabase(db, { log: console.log });
     res.json({ ok: true });
   }));
+  registerAccessRequestRoutes(app, db);
   app.use('/api/admin', admin);
 
   registerExtraRoutes(app, db);

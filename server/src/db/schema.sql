@@ -249,3 +249,15 @@ CREATE TABLE IF NOT EXISTS announcement_events (
 );
 CREATE INDEX IF NOT EXISTS ann_events_draw_idx ON announcement_events (draw_id);
 ALTER TABLE outbox_emails ADD COLUMN IF NOT EXISTS track_token TEXT;
+
+-- Invite-only access requests from the public landing page. Additive; does not create accounts.
+CREATE TABLE IF NOT EXISTS access_requests (
+  id         SERIAL PRIMARY KEY,
+  name       TEXT NOT NULL,
+  email      TEXT NOT NULL,
+  message    TEXT,
+  status     TEXT NOT NULL DEFAULT 'pending',
+  email_id   INTEGER,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS access_requests_created_idx ON access_requests (created_at DESC);

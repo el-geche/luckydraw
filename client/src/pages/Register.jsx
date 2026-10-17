@@ -24,7 +24,7 @@ export default function Register() {
         <Rise><Card className="auth-card narrow">
           <h1>Registration is closed</h1>
           <p className="muted">Registration is closed; contact the organiser for an account.</p>
-          <p className="muted small">Already have an account? <Link className="link" to="/login">Sign in</Link></p>
+          <div className="row-gap"><Link className="btn btn-gold" to="/#request-access">Request access</Link><Link className="btn btn-ghost" to="/login">Sign in</Link></div>
         </Card></Rise>
       </Page>
     );

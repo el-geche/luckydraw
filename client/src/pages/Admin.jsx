@@ -24,7 +24,7 @@ export default function Admin() {
         <div><div className="eyebrow">Operator console</div><h1>Admin</h1></div>
         <ResetButton />
       </Rise>
-      <Tabs value={tab} onChange={setTab} tabs={[{ value: 'draws', label: 'Draws' }, { value: 'create', label: 'Create draw' }, { value: 'calendar', label: 'Calendar' }, { value: 'entries', label: 'Entries' }, { value: 'trail', label: 'Audit trail' }, { value: 'anchors', label: 'Anchors' }, { value: 'winners', label: 'Winners' }, { value: 'reminders', label: 'Reminders' }, { value: 'logs', label: 'Logs & seeds' }, { value: 'users', label: 'Users' }, { value: 'mail', label: 'Outbox' }, { value: 'compliance', label: 'Compliance' }]} />
+      <Tabs value={tab} onChange={setTab} tabs={[{ value: 'draws', label: 'Draws' }, { value: 'create', label: 'Create draw' }, { value: 'calendar', label: 'Calendar' }, { value: 'entries', label: 'Entries' }, { value: 'trail', label: 'Audit trail' }, { value: 'anchors', label: 'Anchors' }, { value: 'winners', label: 'Winners' }, { value: 'reminders', label: 'Reminders' }, { value: 'logs', label: 'Logs & seeds' }, { value: 'users', label: 'Users' }, { value: 'access', label: 'Access requests' }, { value: 'mail', label: 'Outbox' }, { value: 'compliance', label: 'Compliance' }]} />
       <AnimatePresence mode="wait">
         <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }}>
           {tab === 'draws' && <DrawsTab />}
@@ -32,6 +32,7 @@ export default function Admin() {
           {tab === 'entries' && <EntriesTab />}
           {tab === 'logs' && <LogsTab />}
           {tab === 'users' && <UsersTab />}
+          {tab === 'access' && <AccessRequestsTab />}
           {tab === 'mail' && <MailTab />}
           {tab === 'calendar' && <CalendarTab />}
           {tab === 'trail' && <TrailTab />}
@@ -245,6 +246,34 @@ function MailTab() {
           <tbody>{data.map((m) => (
             <tr key={m.id}><td className="muted small nowrap">{dateTime(m.createdAt)}</td><td className="small">{m.to}</td><td className="small">{m.subject}</td>
               <td>{m.receiptCode && <Link className="link mono small" to={`/verify-receipt?code=${m.receiptCode}`}>{m.receiptCode}</Link>}</td><td><span className="chip">{m.transport}</span></td></tr>
+          ))}</tbody>
+        </table>
+      )}
+    </Card>
+  );
+}
+
+function AccessRequestsTab() {
+  const { data, error } = useApi('/admin/access-requests', { poll: 15000 });
+  return (
+    <Card className="table-wrap access-requests" data-testid="access-requests">
+      <div className="toolbar">
+        <div><h2 className="card-title">Access requests {data && <span className="count">{data.length}</span>}</h2>
+          <p className="muted small">Submitted from the invite-only landing page. Requests never create accounts — invite approved people with <span className="mono">npm run create-user</span>.</p></div>
+      </div>
+      <ErrorNote error={error} />
+      {!data ? <Skeleton h={160} /> : !data.length ? <Empty title="No access requests yet">New requests from the public landing page appear here.</Empty> : (
+        <table className="table table-stack">
+          <thead><tr><th>#</th><th>Received</th><th>Name</th><th>Email</th><th>Message</th><th>Status</th></tr></thead>
+          <tbody>{data.map((r) => (
+            <tr key={r.id}>
+              <td data-label="#" className="muted">{r.id}</td>
+              <td data-label="Received" className="muted small nowrap">{dateTime(r.createdAt)}</td>
+              <td data-label="Name"><strong>{r.name}</strong></td>
+              <td data-label="Email" className="break"><a className="link" href={`mailto:${r.email}`}>{r.email}</a></td>
+              <td data-label="Message" className="small request-msg">{r.message || <span className="muted">—</span>}</td>
+              <td data-label="Status"><span className={`chip ${r.status === 'pending' ? 'chip-gold' : ''}`}>{r.status}</span></td>
+            </tr>
           ))}</tbody>
         </table>
       )}
