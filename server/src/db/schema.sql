@@ -184,6 +184,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS reminders_opt_out BOOLEAN NOT NULL DE
 ALTER TABLE users ADD COLUMN IF NOT EXISTS reminders_opt_out_method TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS short_notice_opt_out BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS unsubscribe_token TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS keep_on_reseed BOOLEAN NOT NULL DEFAULT false; -- real accounts (npm run create-user) survive demo reseeds
 ALTER TABLE draws ADD COLUMN IF NOT EXISTS reminder_hours INTEGER NOT NULL DEFAULT 24;
 ALTER TABLE draws ADD COLUMN IF NOT EXISTS short_notice_hours INTEGER;
 CREATE TABLE IF NOT EXISTS reminder_log (

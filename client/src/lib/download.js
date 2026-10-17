@@ -6,8 +6,8 @@ export function downloadJson(name, obj) {
 
 /** Download an admin-only file (Bearer token cannot ride on a plain <a href>). */
 export async function downloadAuthed(path, filename) {
-  const { getToken } = await import('./api.js');
-  const res = await fetch(`/api${path}`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  const { getToken, apiFetch } = await import('./api.js');
+  const res = await apiFetch(path, { headers: { Authorization: `Bearer ${getToken()}` } });
   if (!res.ok) throw new Error(`Download failed (${res.status})`);
   const blob = await res.blob();
   const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: filename });
@@ -15,8 +15,8 @@ export async function downloadAuthed(path, filename) {
   return res.headers.get('x-export-sha256');
 }
 export async function fetchAuthedText(path) {
-  const { getToken } = await import('./api.js');
-  const res = await fetch(`/api${path}`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  const { getToken, apiFetch } = await import('./api.js');
+  const res = await apiFetch(path, { headers: { Authorization: `Bearer ${getToken()}` } });
   if (!res.ok) throw new Error(`Request failed (${res.status})`);
   return res.text();
 }

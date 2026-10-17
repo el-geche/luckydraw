@@ -338,7 +338,7 @@ label.check input { accent-color: var(--gold); width: 16px; height: 16px; }
 .auth-card { display: flex; flex-direction: column; gap: 10px; }
 .auth-card.narrow { max-width: 520px; margin: 0 auto; }
 .picker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.picker-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 11px; border: 1px solid var(--border); background: rgba(0,0,0,.18); color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: border-color .2s, background .2s; }
+.picker-item { display: flex; align-items: center; gap: 6px; padding: 4px 6px 4px 4px; border-radius: 11px; border: 1px solid var(--border); background: rgba(0,0,0,.18); color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: border-color .2s, background .2s; }
 .picker-item:hover { border-color: var(--gold-line); background: var(--gold-soft); }
 .picker-item.admin { grid-column: span 2; border-color: var(--gold-line); }
 .picker-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
@@ -594,3 +594,16 @@ label.check input { accent-color: var(--gold); width: 16px; height: 16px; }
 .static-banner-inner { display: flex; gap: .75rem; align-items: baseline; padding: .55rem 0; flex-wrap: wrap; }
 .static-banner a { color: #e5c76b; text-decoration: underline; text-underline-offset: 2px; }
 .static-badge { flex: none; text-transform: uppercase; letter-spacing: .08em; font-size: .7rem; font-weight: 600; color: #0b1324; background: #d4af37; border-radius: 4px; padding: .12rem .45rem; }
+.static-text { flex: 1 1 420px; }
+.static-text .muted { color: #94a3b8; }
+.static-progress { color: #e5c76b; }
+.static-error { color: #f0b3ab; }
+.static-reset { flex: none; color: #e5c76b; font-size: .82rem; }
+
+.picker-main { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; padding: 6px 8px; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 9px; }
+.picker-main:disabled, .picker-fill:disabled { cursor: progress; opacity: .7; }
+.picker-fill { flex: none; background: none; border: 1px solid var(--border); color: var(--text-2); font: inherit; font-size: .74rem; padding: 4px 8px; border-radius: 7px; cursor: pointer; }
+.picker-fill:hover { border-color: var(--gold-line); color: var(--gold-2); }
+.pw-wrap { position: relative; display: block; }
+.pw-wrap .input { padding-right: 64px; width: 100%; }
+.pw-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: 0; color: var(--gold-2); font: inherit; font-size: .8rem; padding: 4px 8px; cursor: pointer; }

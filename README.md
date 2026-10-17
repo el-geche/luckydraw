@@ -46,7 +46,7 @@ outbox, reminder decisions (including opt-out and unsubscribe examples) and pend
 ### Tests
 
 ```bash
-npm test             # shared engine + crypto (16) and server API/fairness suites (23)
+npm test             # shared engine (16), server API/fairness/users (24), browser demo backend (2)
 node scripts/pwa-check.mjs        # PWA checks against the production build on :4000 (needs Chrome)
 node scripts/screenshots.mjs      # page screenshots → screenshots/
 ```
@@ -222,34 +222,70 @@ with filters.
   `beforeinstallprompt`, standalone and iOS cases) and the CDP `Page.getInstallabilityErrors` and `Page.getAppManifest`
   calls. The latest result is in `screenshots/pwa-check.json`.
 
-## Static preview (GitHub Pages / Vercel)
+## Live demo (GitHub Pages / Vercel): in-browser backend
 
 Live previews: **https://el-geche.github.io/luckydraw/** (GitHub Pages) · **https://luckydraw-sooty.vercel.app** (Vercel).
 
-The hosted previews are **frontend only**. GitHub Pages and the Vercel static deployment have no Express API and no
-database, so the client is built in *static preview* mode:
+Static hosts cannot run Express or Postgres. Static builds therefore run in **demo mode**: the *real server code*
+(`server/src/app.js`, all routes, services and the seed script) runs inside the page against **PGlite**, which is
+Postgres compiled to WASM and persisted in IndexedDB. A banner reads *"Demo mode: runs entirely in your browser; data is
+stored only on this device"* and has a **Reset demo data** button.
+
+* The first visit seeds the demo data in about 2 s: the same accounts, draws, receipts, ledger and outbox as `npm run seed`.
+  After that, everything persists on that device only.
+* Everything works:
+  * quick demo login and email/password sign-in (`admin123` / `demo123`), creating an account, signing out
+  * dashboard and demo wallet, entering draws (5-entry cap enforced by the same transaction code)
+  * the draw lifecycle (an in-tab scheduler closes, seals and runs draws), the wheel, results, history and upcoming draws
+  * receipt lookup, one-click verification, admin views and the outbox
+  * Fairness Report and Compliance PDFs (PDFKit in the browser) and the social card (Canvas)
+* Differences from the full stack:
+  * no email is sent (the outbox exists only in the browser)
+  * no external anchors are submitted (anchor steps show as skipped)
+  * drand beacon values are fetched read-only over HTTPS and fall back to "none" if drand is unreachable
+  * data is per browser and per device. Two tabs of the same browser share one IndexedDB database; prefer one tab.
+* How it works:
+  * `client/src/demo/backend.js` boots the app.
+  * `client/src/demo/shims/` swaps Node-only modules (express, node:crypto, fs, nodemailer, jsonwebtoken, satori/resvg)
+    for small browser implementations. The aliases live in `client/vite.config.js`.
+  * `client/src/lib/api.js` routes `/api` calls to it when `VITE_STATIC_PREVIEW=1`.
+  * Normal (full-stack) builds are unchanged and never include the demo backend.
 
 ```bash
-VITE_BASE=/luckydraw/ VITE_STATIC_PREVIEW=1 npm run build -w client   # GitHub Pages (repo base path)
-VITE_STATIC_PREVIEW=1 VITE_STATIC_HOST=Vercel npx vite build client --outDir dist-vercel   # root-hosted static (Vercel)
+VITE_BASE=/luckydraw/ VITE_STATIC_PREVIEW=1 npx vite build client --outDir dist-pages     # GitHub Pages (repo base path)
+VITE_STATIC_PREVIEW=1 VITE_STATIC_HOST=Vercel npx vite build client --outDir dist-vercel  # Vercel (root)
+/workspace/pwenv/bin/python scripts/static-demo-check.py <url> shot.png                  # headless check of a deployment
 ```
 
-* Vercel: copy `deploy/vercel-static.json` to `client/dist-vercel/vercel.json` (SPA rewrites and SW/manifest headers), then run `vercel deploy --prod` from that folder.
-* `VITE_BASE` sets the router basename, asset URLs, manifest `id`/`start_url`/`scope`/icons and the service-worker
-  navigation fallback. `404.html` is a copy of `index.html`, so deep links work on Pages.
-* In static preview, a persistent banner reads *"Static preview on GitHub Pages: live draws need the backend; see
-  README to run it"*. API-backed views show a clear "needs the backend" message instead of broken data. A normal
-  build shows the same banner automatically if `/api` turns out to be unreachable.
-* These work fully client-side: **Verify** (paste seed + entries; it uses the same shared engine and SHA-256),
-  **Algorithm / How it works**, **FAQ**, **Terms**, **Privacy**, the PWA install/offline shell.
-* These need the backend: live and upcoming draws, entering, accounts and wallet, receipts lookup, history and results
-  data, published-draw verification bundles, PDFs, the outbox and admin.
-* Deployment: the built preview is published to the `gh-pages` branch (Pages source: branch). `deploy/github-pages-workflow.yml` is a ready-made GitHub Actions alternative that tests, builds and deploys with `actions/deploy-pages`. Copy it to `.github/workflows/` to use it.
+* Pages: `404.html` is a copy of `index.html` (SPA deep links), published on the `gh-pages` branch.
+  `deploy/github-pages-workflow.yml` is a ready-made Actions alternative.
+* Vercel: copy `deploy/vercel-static.json` to `client/dist-vercel/vercel.json` (SPA rewrites and SW/manifest headers),
+  then run `vercel deploy --prod` from that folder.
+* Full-stack builds show a "backend unavailable" banner automatically if `/api` cannot be reached.
 
 To host the **full stack**, run the Express server (it serves `client/dist`) on a Node host such as Render, Railway,
 Fly.io or a VM, with `DATABASE_URL` pointing at managed Postgres (Supabase, Neon, Render/Railway Postgres). PGlite
 needs a persistent disk and a single instance. On Vercel, the API would have to become serverless functions with
 external Postgres, and the in-process scheduler would move to Vercel Cron.
+
+## Real accounts (`npm run create-user`)
+
+Seeded demo accounts are public. Create real accounts for a local or hosted database with:
+
+```bash
+export OWNER_PW='…'   # keep the password in an env var; it is never printed or logged
+npm run create-user -- --email you@example.com --role admin --name "Organizer" --password-env OWNER_PW
+npm run create-user -- --email member@example.com --role member --name "Member"   # prompts for the password, no echo
+```
+
+* Passwords are bcrypt-hashed (cost 10); the minimum length is 6. Running the command again for the same email updates
+  the name, role and password.
+* With `DATABASE_URL` set it writes to that database directly. Locally, if the dev server is running (PGlite is
+  single-process), it goes through the admin-only `POST /api/admin/users`, signing in as the seeded admin, or
+  `ADMIN_EMAIL` + `ADMIN_PASSWORD_ENV`.
+* These accounts are flagged `keep_on_reseed`, so `npm run seed` and admin **Reset demo data** keep them; their demo
+  activity (entries, wallet) is reset.
+* They exist only in the database you ran the command against. They are never part of the static demo bundle.
 
 ---
 

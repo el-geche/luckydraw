@@ -9,13 +9,12 @@ import { sha256 } from '../lib/sha256.js';
 import { DrawWheel } from '../components/DrawWheel.jsx';
 import { Button, Card, Tabs, ErrorNote } from '../components/ui.jsx';
 import { pct } from '../lib/format.js';
-import { STATIC_PREVIEW } from '../lib/staticMode.js';
 
 export default function Verify() {
   const { id } = useParams();
   const nav = useNavigate();
-  const { data: draws } = useApi(STATIC_PREVIEW ? null : '/draws?status=drawn');
-  const [source, setSource] = useState(STATIC_PREVIEW && !id ? 'paste' : 'published');
+  const { data: draws } = useApi('/draws?status=drawn');
+  const [source, setSource] = useState('published');
   const [json, setJson] = useState('');
   const [state, setState] = useState(null); // { audit, verification }
   const [err, setErr] = useState(null);
@@ -63,7 +62,6 @@ export default function Verify() {
                 <option value="" disabled>Select a draw…</option>
                 {draws?.map((d) => <option key={d.id} value={d.id}>#{d.id} — {d.title} ({d.mode})</option>)}
               </select>
-              {STATIC_PREVIEW && <p className="note small">Published draws are served by the backend, which is not running in this static preview. Use <strong>Paste seed + entries</strong> to verify any audit record (for example one exported from a running instance) entirely in your browser.</p>}
               <p className="muted small">Opens the draw’s public verification page: one-click check of the audit chain, sealed hash, anchors, seed derivation and winner.</p>
               {id && <Button className="btn-ghost" onClick={() => loadPublished(id)} loading={busy}>Re-run verification</Button>}
             </div>

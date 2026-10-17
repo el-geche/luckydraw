@@ -19,6 +19,7 @@
     <script>
       // Capture the install prompt as early as possible (before React mounts) so it is never missed.
       window.__ldInstall = null;
+      window.__LD_ENV__ = window.__LD_ENV__ || {};
       window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__ldInstall = e; window.dispatchEvent(new Event('ld:installable')); });
       window.addEventListener('appinstalled', function () { window.__ldInstall = null; window.dispatchEvent(new Event('ld:installed')); });
     </script>

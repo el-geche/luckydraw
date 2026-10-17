@@ -30,7 +30,7 @@ export function sendExport(res, { name, format, rows, columns, meta = {} }) {
 /** Tiny fixed-window in-memory rate limiter keyed by client IP (IPs are never persisted). */
 export function rateLimit({ windowMs, max }) {
   const hits = new Map();
-  setInterval(() => { const now = Date.now(); for (const [k, v] of hits) if (v.reset <= now) hits.delete(k); }, Math.max(windowMs, 1000)).unref();
+  setInterval(() => { const now = Date.now(); for (const [k, v] of hits) if (v.reset <= now) hits.delete(k); }, Math.max(windowMs, 1000)).unref?.();
   return (req, res, next) => {
     const key = req.ip || req.socket.remoteAddress || 'unknown';
     const now = Date.now();

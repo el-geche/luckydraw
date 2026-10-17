@@ -19,6 +19,8 @@ const DAY = 24 * HOUR;
 
 export async function seedDatabase(db, { log = () => {}, mailTransport } = {}) {
   await migrate(db);
+  // Real accounts created with `npm run create-user` survive reseeding (their demo activity does not).
+  const { rows: kept } = await db.query('SELECT email, name, password_hash, role, referral_code, unsubscribe_token, timezone, created_at FROM users WHERE keep_on_reseed');
   await db.exec('TRUNCATE announcement_events, preference_events, reminder_log, draw_anchors, confirmation_ledger, outbox_emails, entry_receipts, draw_logs, wallet_transactions, entries, draws, draw_schedules, users RESTART IDENTITY CASCADE');
   const now = Date.now();
   const t0 = new Date(now - 45 * DAY);
@@ -33,8 +35,13 @@ export async function seedDatabase(db, { log = () => {}, mailTransport } = {}) {
       [a.email, a.name, hash, a.role, a.referralCode, a.referredBy ? ids[a.referredBy] : null, t0, newUnsubscribeToken(), a.timezone ?? 'Africa/Nairobi']);
     ids[a.email] = rows[0].id;
   }
+  for (const k of kept) {
+    await db.query(
+      `INSERT INTO users (email, name, password_hash, role, referral_code, created_at, unsubscribe_token, timezone, keep_on_reseed) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,true)`,
+      [k.email, k.name, k.password_hash, k.role, k.referral_code, k.created_at, k.unsubscribe_token ?? newUnsubscribeToken(), k.timezone]);
+  }
   const members = DEMO_ACCOUNTS.filter((a) => a.role === 'member');
-  log(`  users: ${DEMO_ACCOUNTS.length}`);
+  log(`  users: ${DEMO_ACCOUNTS.length}${kept.length ? ` (+${kept.length} kept real account${kept.length > 1 ? 's' : ''})` : ''}`);
 
   // Wallet history (all simulated)
   for (const [i, a] of members.entries()) {

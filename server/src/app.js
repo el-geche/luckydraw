@@ -18,6 +18,7 @@ import { logAnnouncement } from './services/events.js';
 import { afterDraw } from './services/lifecycle.js';
 import { newUnsubscribeToken } from './services/reminders.js';
 import { iso, publicName } from './util.js';
+import { upsertUser } from './services/users.js';
 
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const intParam = (v, label = 'id') => {
@@ -227,6 +228,11 @@ export function createApp(db) {
       `SELECT u.*, COALESCE((SELECT SUM(amount_cents) FROM wallet_transactions w WHERE w.user_id = u.id),0)::int AS balance,
               (SELECT COUNT(*) FROM entries e WHERE e.user_id = u.id)::int AS entry_count FROM users u ORDER BY u.id`);
     res.json(rows.map((u) => ({ ...userOut(u), balanceCents: u.balance, entryCount: u.entry_count })));
+  }));
+  // Create/update a real (non-demo) account; used by `npm run create-user` when the server holds the database.
+  admin.post('/users', wrap(async (req, res) => {
+    const u = await upsertUser(db, { email: req.body?.email, name: req.body?.name, role: req.body?.role, password: req.body?.password });
+    res.status(u.created ? 201 : 200).json(u);
   }));
   admin.get('/outbox', wrap(async (_req, res) => {
     const { rows } = await db.query('SELECT * FROM outbox_emails ORDER BY created_at DESC, id DESC LIMIT 300');

@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
+import { useApiBlobUrl } from '../lib/useApiBlob.js';
 import { motion } from 'framer-motion';
 import { Page } from '../components/Page.jsx';
 import { useApi } from '../lib/useApi.js';
@@ -50,11 +51,16 @@ export default function Winner() {
         </Card>
         <Card>
           <h3 className="card-title">Share</h3>
-          {a.cardUrl ? <img className="share-card" src={a.cardUrl} alt={`Social card for ${a.title}`} loading="lazy" /> : <p className="muted small">Sharing is available only for public announcements.</p>}
+          {a.cardUrl ? <CardImage className="share-card" src={a.cardUrl} alt={`Social card for ${a.title}`} loading="lazy" /> : <p className="muted small">Sharing is available only for public announcements.</p>}
           {a.cardUrl && <div className="row-gap"><Button className="btn-ghost btn-sm" onClick={share}>Share announcement</Button><a className="link small" href={a.cardUrl} download>↓ Card (PNG)</a></div>}
           <p className="small muted">Verify URL: <span className="mono">{a.shortVerifyUrl}</span></p>
         </Card>
       </motion.div>
     </Page>
   );
+}
+
+function CardImage({ src, ...rest }) {
+  const url = useApiBlobUrl(src);
+  return url ? <img src={url} {...rest} /> : <div className="share-card skeleton" style={{ aspectRatio: '1200 / 630' }} />;
 }

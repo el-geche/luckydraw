@@ -8,6 +8,12 @@ import './styles.css';
 import App from './App.jsx';
 import { AuthProvider } from './lib/auth.jsx';
 import { ToastProvider } from './lib/toast.jsx';
+import { STATIC_PREVIEW } from './lib/staticMode.js';
+
+if (STATIC_PREVIEW) {
+  import('./demo/links.js').then((m) => m.installApiLinkInterceptor());
+  import('./demo/backend.js').then((m) => m.startDemoBackend()).catch(() => {});
+}
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

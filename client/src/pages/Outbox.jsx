@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { STATIC_PREVIEW } from '../lib/staticMode.js';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Page, Rise } from '../components/Page.jsx';
@@ -20,7 +21,7 @@ export default function Outbox() {
     <Page className="outbox">
       <Rise className="page-head">
         <div><div className="eyebrow">Development mail</div><h1>Demo outbox</h1>
-          <p className="lead small-lead">Entry confirmations, reminders and winner notifications are rendered as real messages but <strong>not delivered</strong>. They are saved to <span className="mono">server/.data/outbox/*.eml</span> and listed here.</p></div>
+          <p className="lead small-lead">Entry confirmations, reminders and winner notifications are rendered as real messages but <strong>not delivered</strong>. {STATIC_PREVIEW ? <>In demo mode they are stored only in this browser (IndexedDB) and listed here.</> : <>They are saved to <span className="mono">server/.data/outbox/*.eml</span> and listed here.</>}</p></div>
         {user?.role === 'admin' && <Tabs value={scope} onChange={(v) => { setScope(v); setSel(null); }} tabs={[{ value: 'mine', label: 'My mail' }, { value: 'all', label: 'All outgoing mail' }]} />}
       </Rise>
       {!list ? <Skeleton h={400} /> : !list.length ? <Empty title="No messages yet">Enter a draw and your proof-of-entry email will appear here. <Link className="link" to="/">Browse draws →</Link></Empty> : (

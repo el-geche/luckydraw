@@ -1,6 +1,6 @@
 {
   "base": "http://localhost:4000",
-  "at": "2026-10-17T06:39:26.305Z",
+  "at": "2026-10-17T07:22:32.885Z",
   "results": [
     {
       "id": "1a",
@@ -48,7 +48,7 @@
       "id": "2c",
       "name": "offline notice shown; cached public draws still listed",
       "pass": true,
-      "detail": "offline bar=true, upcoming cards from cache=10"
+      "detail": "offline bar=true, upcoming cards from cache=9"
     },
     {
       "id": "2d",
