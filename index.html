@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1324" />
+    <meta name="description" content="LuckyDraw — transparent, provably fair raffles. Demo platform: no real money." />
+    <link rel="icon" href="/luckydraw/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/luckydraw/icons/icon-64.png" sizes="64x64" type="image/png" />
+    <link rel="apple-touch-icon" href="/luckydraw/icons/apple-touch-icon-180.png" sizes="180x180" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="LuckyDraw" />
+    <title>LuckyDraw — Provably fair draws (Demo)</title>
+    <script type="module" crossorigin src="/luckydraw/assets/index-iBy7eBNe.js"></script>
+    <link rel="stylesheet" crossorigin href="/luckydraw/assets/index-CMLlr6lz.css">
+  <link rel="manifest" href="/luckydraw/manifest.webmanifest"></head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Capture the install prompt as early as possible (before React mounts) so it is never missed.
+      window.__ldInstall = null;
+      window.__LD_ENV__ = window.__LD_ENV__ || {};
+      window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__ldInstall = e; window.dispatchEvent(new Event('ld:installable')); });
+      window.addEventListener('appinstalled', function () { window.__ldInstall = null; window.dispatchEvent(new Event('ld:installed')); });
+    </script>
+  </body>
+</html>
