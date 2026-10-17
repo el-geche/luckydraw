@@ -1,0 +1,22 @@
+# dependencies & builds
+node_modules/
+dist/
+client/dist/
+client/dist-*/
+client/dev-dist/
+# runtime data: embedded DB, demo outbox (.eml/.html), anchors
+server/.data/
+**/outbox/
+*.eml
+# secrets / local env (the documented example is kept)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.vercel/
+# misc
+*.log
+*.zip
+screenshots/*.tmp
+.DS_Store

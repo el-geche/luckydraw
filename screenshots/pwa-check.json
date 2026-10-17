@@ -1,0 +1,108 @@
+{
+  "base": "http://localhost:4000",
+  "at": "2026-10-17T06:39:26.305Z",
+  "results": [
+    {
+      "id": "1a",
+      "name": "manifest linked + served as application/manifest+json",
+      "pass": true,
+      "detail": "/manifest.webmanifest (application/manifest+json)"
+    },
+    {
+      "id": "1b",
+      "name": "name/short_name/start_url/scope/display",
+      "pass": true,
+      "detail": "display=standalone"
+    },
+    {
+      "id": "1c",
+      "name": "theme/background navy",
+      "pass": true,
+      "detail": "#0b1324 / #0b1324"
+    },
+    {
+      "id": "1d",
+      "name": "icons 64/128/192/256/512 + maskable 512 (real PNG sizes)",
+      "pass": true,
+      "detail": "icon-64.png=64x64 icon-128.png=128x128 icon-192.png=192x192 icon-256.png=256x256 icon-512.png=512x512 maskable-192.png=192x192 maskable-512.png=512x512"
+    },
+    {
+      "id": "1e",
+      "name": "apple-touch-icon 180",
+      "pass": true,
+      "detail": "/icons/apple-touch-icon-180.png"
+    },
+    {
+      "id": "2a",
+      "name": "service worker registered and controlling the page",
+      "pass": true,
+      "detail": "http://localhost:4000/sw.js (activated)"
+    },
+    {
+      "id": "2b",
+      "name": "core pages load with network offline (app shell + cached public data)",
+      "pass": true,
+      "detail": "/:ok  /upcoming:ok  /history:ok  /faq:ok  /verify:ok  /verify-receipt:ok  /draws/6:ok"
+    },
+    {
+      "id": "2c",
+      "name": "offline notice shown; cached public draws still listed",
+      "pass": true,
+      "detail": "offline bar=true, upcoming cards from cache=10"
+    },
+    {
+      "id": "2d",
+      "name": "no auth/admin/receipt/seed/verification responses cached",
+      "pass": true,
+      "detail": "/api/draws, /api/upcoming?weeks=8, /api/draws?status=drawn,void, /api/draws?status=drawn"
+    },
+    {
+      "id": "2e",
+      "name": "server-only page offline → serious offline fallback",
+      "pass": true,
+      "detail": "You are not connected"
+    },
+    {
+      "id": "3a",
+      "name": "no install UI without beforeinstallprompt",
+      "pass": true,
+      "detail": "elements=0"
+    },
+    {
+      "id": "3b",
+      "name": "banner + header button + footer link appear after event; Install calls prompt() once",
+      "pass": true,
+      "detail": "header=true, footer link=1, prompt() calls=1, banner after accept=0"
+    },
+    {
+      "id": "3c",
+      "name": "dismissal remembered (banner hidden after reload, footer link remains)",
+      "pass": true,
+      "detail": "banner=0, link=1"
+    },
+    {
+      "id": "3d",
+      "name": "hidden when already installed (display-mode: standalone)",
+      "pass": true,
+      "detail": "elements=0"
+    },
+    {
+      "id": "3e",
+      "name": "iOS Safari shows \"Share > Add to Home Screen\" hint (no prompt button)",
+      "pass": true,
+      "detail": "Install LuckyDrawOn iPhone or iPad: tap Share ⎋ then Add to Home Screen.Not now"
+    },
+    {
+      "id": "4a",
+      "name": "CDP Page.getInstallabilityErrors returns no errors",
+      "pass": true,
+      "detail": "none"
+    },
+    {
+      "id": "4b",
+      "name": "CDP Page.getAppManifest: parsed without errors, display standalone",
+      "pass": true,
+      "detail": "url=http://localhost:4000/manifest.webmanifest display=standalone errors=0"
+    }
+  ]
+}
